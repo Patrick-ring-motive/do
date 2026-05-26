@@ -24,11 +24,14 @@ const walkProps = (obj,props) =>{
   return res;
 };
 
+const resolve = (x, ctx) => isString(x) ? findProp(x, ctx) : x;
+
 const prefixes = {
   'new ': (fn, args, _key, _ctx) => new fn(...args),
   'let ': (_fn, args, key, ctx) => {
     ctx._vars ??= Object.create(null);
-    const val = args.length === 1 ? args[0] : args;
+    const resolved = args.map(x => resolve(x, ctx));
+    const val = resolved.length === 1 ? resolved[0] : resolved;
     return ctx._vars[key] = val;
   },
   'set ': (_fn, args, _key, _ctx) => {
@@ -41,37 +44,24 @@ const prefixes = {
   },
 };
 
-const findProp = (name,ctx) =>{
-  const keys = name.split('.');
-  for(const obj of [ctx,...globals]){
-    const res = walkProps(obj,keys);
-    if(res){
-      return res;
-    }
-  }
-};
-
-const isArray = x => Array.isArray(x) || x instanceof Array;
-const isString = x => typeof x === 'string' || x instanceof String;
-
-function $do(commands,args){
+function $do(commands, args){
   if(isString(commands)){
-    args ??=[];
-    if(!isArray(args)){
-      args = [args];
-    }
-    cmd = commands;
+    args ??= [];
+    if(!isArray(args)) args = [args];
+    const cmd = commands;
     commands = {};
     commands[cmd] = args;
   }
-  if(!isArray(commands)){
-    commands = [commands];
-  }
-  let results = [];
+  if(!isArray(commands)) commands = [commands];
+
+  const results = [];
+  results._vars = Object.create(null);
+  const ctx = results;
+
   for(const cmd of commands){
     const [raw, cmdArgs] = Object.entries(cmd)[0];
-    const argArr = isArray(cmdArgs) ? cmdArgs : [cmdArgs];
-  
+    const argArr = (isArray(cmdArgs) ? cmdArgs : [cmdArgs]).map(x => resolve(x, ctx));
+
     let handler, fnKey;
     for(const prefix in prefixes){
       if(raw.startsWith(prefix)){
@@ -81,12 +71,13 @@ function $do(commands,args){
       }
     }
     fnKey ??= raw;
-  
+
     const fnNeeded = !handler || handler === prefixes['new '];
-    const fn = fnNeeded ? findProp(fnKey,results) : undefined;
+    const fn = fnNeeded ? findProp(fnKey, ctx) : undefined;
     handler ??= (fn, args) => fn(...args);
-  
-    results.push(handler(fn, argArr, fnKey, results));
+
+    results.push(handler(fn, argArr, fnKey, ctx));
   }
-  return results;
+
+  return { ctx, results };
 }
