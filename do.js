@@ -25,8 +25,20 @@ const findProp = name =>{
     }
   }
 };
+const isArray = x => Array.isArray(x) || x instanceof Array;
+const isString = x => typeof x === 'string' || x instanceof String;
 
-function $do(commands){
+function $do(commands,args){
+  if(isString(commands)){
+    args ??=[];
+    if(!isArray(args)){
+      args = [args];
+    }
+    return findProp(commands)(...args);
+  }
+  if(!isArray(commands)){
+    commands = [commands];
+  }
   let res;
   for(const cmd of commands){
     const parts = Object.entries(cmd);
