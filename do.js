@@ -24,7 +24,11 @@ const walkProps = (obj,props) =>{
   return res;
 };
 
-const resolve = (x, ctx) => isString(x) ? findProp(x, ctx) : x;
+const resolve = (x, ctx) => {
+  if(!isString(x)) return x;
+  const found = findProp(x, ctx);
+  return found !== undefined ? found : x;
+};
 
 const prefixes = {
   'new ': (fn, args, _key, _ctx) => new fn(...args),
