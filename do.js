@@ -3,11 +3,6 @@ const _do = Object.create(null);
 
 globals.add(_do);
 
-const _let = (ctx,key,value)=>{
-  ctx._vars ??= Object.create(null);
-  ctx._vars[key] = value;
-};
-
 try{globals.add(global);}catch{}
 try{globals.add(globalThis);}catch{}
 try{globals.add(self);}catch{}
