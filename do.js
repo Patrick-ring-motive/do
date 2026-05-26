@@ -9,9 +9,14 @@ try{globals.add(document);}catch{}
 try{globals.add(Object);}catch{}
 
 const walkProps = (obj,props) =>{
+  let lastRes;
   let res = obj;
   for(const prop of props){
+    lastRes = res;
     res = res?.[prop];
+  }
+  if(lastRes && (typeof res === 'function')){
+    res = res.bind(lastRes);
   }
   return res;
 };
