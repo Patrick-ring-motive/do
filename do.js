@@ -41,9 +41,9 @@ const prefixes = {
   },
 };
 
-const findProp = name =>{
+const findProp = (name,ctx) =>{
   const keys = name.split('.');
-  for(const obj of globals){
+  for(const obj of [ctx,...globals]){
     const res = walkProps(obj,keys);
     if(res){
       return res;
@@ -83,7 +83,7 @@ function $do(commands,args){
     fnKey ??= raw;
   
     const fnNeeded = !handler || handler === prefixes['new '];
-    const fn = fnNeeded ? findProp(fnKey) : undefined;
+    const fn = fnNeeded ? findProp(fnKey,results) : undefined;
     handler ??= (fn, args) => fn(...args);
   
     results.push(handler(fn, argArr, fnKey, results));
