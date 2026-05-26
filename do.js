@@ -3,29 +3,43 @@ const _do = Object.create(null);
 
 globals.add(_do);
 
-try{globals.add(global);}catch{}
-try{globals.add(globalThis);}catch{}
-try{globals.add(self);}catch{}
-try{globals.add(window);}catch{}
-try{globals.add(this);}catch{}
-try{globals.add(document);}catch{}
-try{globals.add(Object);}catch{}
+try {
+  globals.add(global);
+} catch {}
+try {
+  globals.add(globalThis);
+} catch {}
+try {
+  globals.add(self);
+} catch {}
+try {
+  globals.add(window);
+} catch {}
+try {
+  globals.add(this);
+} catch {}
+try {
+  globals.add(document);
+} catch {}
+try {
+  globals.add(Object);
+} catch {}
 
-const walkProps = (obj,props) =>{
+const walkProps = (obj, props) => {
   let lastRes;
   let res = obj;
-  for(const prop of props){
+  for (const prop of props) {
     lastRes = res;
     res = res?.[prop];
   }
-  if(lastRes && (typeof res === 'function')){
+  if (lastRes && (typeof res === 'function')) {
     res = res.bind(lastRes);
   }
   return res;
 };
 
 const resolve = (x, ctx) => {
-  if(!isString(x)) return x;
+  if (!isString(x)) return x;
   const found = findProp(x, ctx);
   return found !== undefined ? found : x;
 };
@@ -48,36 +62,36 @@ const prefixes = {
   },
 };
 
-const findProp = (name,ctx=Object.create(null)) =>{
+const findProp = (name, ctx = Object.create(null)) => {
   const keys = name.split('.');
-  for(const obj of [ctx._vars ?? ctx,...globals]){
-    const res = walkProps(obj,keys);
-    if(res !== undefined){
+  for (const obj of [ctx._vars ?? ctx, ...globals]) {
+    const res = walkProps(obj, keys);
+    if (res !== undefined) {
       return res;
     }
   }
 };
 
-function $do(commands, args){
-  if(isString(commands)){
+function $do(commands, args) {
+  if (isString(commands)) {
     args ??= [];
-    if(!isArray(args)) args = [args];
+    if (!isArray(args)) args = [args];
     const cmd = commands;
     commands = {};
     commands[cmd] = args;
   }
-  if(!isArray(commands)) commands = [commands];
+  if (!isArray(commands)) commands = [commands];
 
   const results = [];
   const ctx = Object.create(null);
 
-  for(const cmd of commands){
+  for (const cmd of commands) {
     const [raw, cmdArgs] = Object.entries(cmd)[0];
     const argArr = (isArray(cmdArgs) ? cmdArgs : [cmdArgs]).map(x => resolve(x, ctx));
 
     let handler, fnKey;
-    for(const prefix in prefixes){
-      if(raw.startsWith(prefix)){
+    for (const prefix in prefixes) {
+      if (raw.startsWith(prefix)) {
         handler = prefixes[prefix];
         fnKey = raw.slice(prefix.length);
         break;
@@ -92,5 +106,8 @@ function $do(commands, args){
     results.push(handler(fn, argArr, fnKey, ctx));
   }
 
-  return { ctx, results };
+  return {
+    ctx,
+    results
+  };
 }
