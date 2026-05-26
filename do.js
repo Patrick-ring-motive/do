@@ -47,8 +47,8 @@ function $do(commands,args){
   let res;
   for(const cmd of commands){
     const parts = Object.entries(cmd);
-    const fn = findProp(cmd[0]);
-    const args = cmd[1];
+    const fn = findProp(parts[0]);
+    const args = parts[1];
     res = fn(...args);
   }
   return res;
