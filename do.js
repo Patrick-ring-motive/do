@@ -52,7 +52,7 @@ const findProp = (name,ctx=Object.create(null)) =>{
   const keys = name.split('.');
   for(const obj of [ctx._vars ?? ctx,...globals]){
     const res = walkProps(obj,keys);
-    if(res){
+    if(res !== undefined){
       return res;
     }
   }
