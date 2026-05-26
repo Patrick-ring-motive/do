@@ -55,8 +55,7 @@ function $do(commands, args){
   if(!isArray(commands)) commands = [commands];
 
   const results = [];
-  results._vars = Object.create(null);
-  const ctx = results;
+  const ctx = Object.create(null);
 
   for(const cmd of commands){
     const [raw, cmdArgs] = Object.entries(cmd)[0];
