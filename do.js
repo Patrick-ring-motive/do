@@ -2,16 +2,12 @@ const globals = new Set();
 const _do = Object.create(null);
 
 _do['for'] = (items,block)=>{
-  if(items[Symbol.iterator]){
-    for(const item of items){
-      const args = Array(items.length).fill(item);
-      $do(block,args);
-    }
-  }else{
-    for(const item in items){
-      const args = Array(items.length).fill([item,items[item]);
-      $do(block,args);
-    }
+  if(!items[Symbol.iterator]){
+    items = Object.entries(items);
+  }
+  for(const item of items){
+    const args = Array(items.length).fill(item);
+    $do(block,args);
   }
   return items;
 };
