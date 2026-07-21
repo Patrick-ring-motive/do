@@ -1,13 +1,13 @@
 const globals = new Set();
 const _do = Object.create(null);
 
-_do['for'] = (items,block)=>{
-  if(!items[Symbol.iterator]){
+_do['for'] = (items, block) => {
+  if (!items[Symbol.iterator]) {
     items = Object.entries(items);
   }
-  for(const item of items){
+  for (const item of items) {
     const args = Array(items.length).fill(item);
-    $do(block,args);
+    $do(block, args);
   }
   return items;
 };
